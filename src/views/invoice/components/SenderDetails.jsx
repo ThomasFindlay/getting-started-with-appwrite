@@ -1,12 +1,12 @@
 import Input from "../../../components/form/Input";
 
-const CompanyDetails = props => {
+const SenderDetails = props => {
   const { form, onFormChange } = props;
 
   return (
     <div>
       <h2 className="mb-4 text-sm font-semibold text-indigo-600/75">
-        Company Details
+        Sender Details
       </h2>
 
       <div className="flex flex-wrap gap-x-8 gap-y-4 md:[&>*]:basis-[calc(50%-2rem)]">
@@ -50,4 +50,4 @@ const CompanyDetails = props => {
   );
 };
 
-export default CompanyDetails;
+export default SenderDetails;

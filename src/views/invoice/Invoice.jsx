@@ -11,7 +11,7 @@ import {
 import { useUserContext } from "../../context/user.context";
 import BankDetails from "./components/BankDetails";
 import ClientDetails from "./components/ClientDetails";
-import CompanyDetails from "./components/CompanyDetails";
+import SenderDetails from "./components/SenderDetails";
 import InvoiceDetails from "./components/InvoiceDetails";
 import toast from "react-hot-toast";
 import { formatDate } from "../../helpers/formatDate";
@@ -28,30 +28,59 @@ const config = {
 const Invoice = props => {
   const { user } = useUserContext();
   const [form, setForm] = useState({
+    // invoiceId: "0001",
+    // date: "2023-11-12",
+    // dueDate: "2023-12-10",
+    // amount: "£2400",
+    // description: "Web Development Services",
+    // senderName: "Thomas",
+    // senderAddress: "",
+    // senderPostcode: "",
+    // senderCity: "",
+    // senderCountry: "",
+    // senderEmail: "",
+    // senderPhone: "",
+    // clientName: "Client Company",
+    // clientAddress: "",
+    // clientPostcode: "",
+    // clientCity: "",
+    // clientCountry: "",
+    // clientEmail: "",
+    // clientPhone: "",
+    // accountName: "My Account Name",
+    // accountSortCode: "44-44-44",
+    // accountNumber: "321312321",
+    // accountAddress: "23 My Address",
+    // accountIban: "",
+    // paymentReceived: false,
+    // paymentDate: "",
     invoiceId: "0001",
     date: "2023-11-12",
     dueDate: "2023-12-10",
     amount: "£2400",
     description: "Web Development Services",
-    senderName: "Thomas",
-    senderAddress: "Findlay",
-    senderPostcode: "",
-    senderCity: "",
-    senderCountry: "",
-    senderEmail: "",
-    senderPhone: "",
+    senderName: "Thomas Findlay",
+    senderAddress: "18 Shirley Street",
+    senderPostcode: "LE1 6JD",
+    senderCity: "Leicester",
+    senderCountry: "United Kingdom",
+    senderEmail: "thomasfindlay94@gmail.com",
+    senderPhone: "07685768565",
     clientName: "Client Company",
-    clientAddress: "",
-    clientPostcode: "",
-    clientCity: "",
-    clientCountry: "",
-    clientEmail: "",
-    clientPhone: "",
+    clientAddress: "3 Broadclyst Street",
+    clientPostcode: "BE5 D95",
+    clientCity: "Bristol",
+    clientCountry: "United Kingdom",
+    clientEmail: "company@gmail.com",
+    clientPhone: "5435435435",
     accountName: "My Account Name",
-    accountSortCode: "44-44-44",
     accountNumber: "321312321",
+    accountSortCode: "44-44-44",
     accountAddress: "23 My Address",
-    accountIban: "",
+    accountPostCode: "LE3 0BD",
+    accountCity: "Norwich",
+    accountCountry: "United Kingdom",
+    accountIban: "42342342343243",
     paymentReceived: false,
     paymentDate: "",
   });
@@ -179,6 +208,8 @@ const Invoice = props => {
     }
   };
 
+  const onDownloadInvoice = () => {};
+
   console.log("form", form);
   useEffect(() => {
     if (!params.id) {
@@ -226,7 +257,7 @@ const Invoice = props => {
           >
             <div className="flex flex-col gap-8 md:gap-12">
               <InvoiceDetails form={form} onFormChange={onFormChange} />
-              <CompanyDetails form={form} onFormChange={onFormChange} />
+              <SenderDetails form={form} onFormChange={onFormChange} />
               <ClientDetails form={form} onFormChange={onFormChange} />
               <BankDetails form={form} onFormChange={onFormChange} />
             </div>
@@ -238,14 +269,23 @@ const Invoice = props => {
               >
                 {deleteInvoiceStatus === "PENDING" ? "Deleting..." : "Delete"}
               </button>
-              <button
-                type="submit"
-                className="min-w-[6rem] px-4 py-3 mr-8 font-semibold text-indigo-100 transition-colors duration-150 bg-indigo-600 rounded-md hover:bg-indigo-800"
-              >
-                {submitInvoiceStatus === "PENDING"
-                  ? "Submitting..."
-                  : submitButtonText}
-              </button>
+              <div>
+                <button
+                  type="button"
+                  className="min-w-[6rem] px-4 py-3 mr-4 font-semibold text-indigo-900 transition-colors duration-150 bg-indigo-200/50 rounded-md hover:bg-indigo-800 hover:text-indigo-100"
+                  onClick={onDownloadInvoice}
+                >
+                  Download Invoice
+                </button>
+                <button
+                  type="submit"
+                  className="min-w-[6rem] px-4 py-3 mr-8 font-semibold text-indigo-100 transition-colors duration-150 bg-indigo-600 rounded-md hover:bg-indigo-800"
+                >
+                  {submitInvoiceStatus === "PENDING"
+                    ? "Submitting..."
+                    : submitButtonText}
+                </button>
+              </div>
             </div>
           </form>
         ) : null}

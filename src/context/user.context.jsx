@@ -24,6 +24,7 @@ export const UserContextProvider = props => {
       }
     } catch (error) {
       console.error(error);
+      navigate("/auth/login");
     }
     setIsInitialised(true);
   };

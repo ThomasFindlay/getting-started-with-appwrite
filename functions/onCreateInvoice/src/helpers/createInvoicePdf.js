@@ -1,45 +1,11 @@
-import { PDFDocument, PageSizes, StandardFonts } from "pdf-lib";
-import { Buffer } from "node:buffer";
-import fs from "node:fs";
-
-const data = {
-  invoiceId: "0001",
-  date: "2023-11-12T00:00:00.000+00:00",
-  dueDate: "2023-12-10T00:00:00.000+00:00",
-  amount: "£2400",
-  description: "Web Development Services",
-  senderName: "Thomas Findlay",
-  senderAddress: "18 Shirley Street",
-  senderPostcode: "LE1 6JD",
-  senderCity: "Leicester",
-  senderCountry: "United Kingdom",
-  senderEmail: "thomasfindlay94@gmail.com",
-  senderPhone: "07685768565",
-  clientName: "Client Company",
-  clientAddress: "3 Broadclyst Street",
-  clientPostcode: "BE5 D95",
-  clientCity: "Bristol",
-  clientCountry: "United Kingdom",
-  clientEmail: "company@gmail.com",
-  clientPhone: "5435435435",
-  accountName: "My Account Name",
-  accountSortCode: "44-44-44",
-  accountNumber: "321312321",
-  accountAddress: "23 My Address",
-  accountPostcode: "LE3 0BD",
-  accountCity: "Norwich",
-  accountCountry: "United Kingdom",
-  accountIban: "42342342343243",
-  paymentReceived: true,
-  paymentDate: "2023-11-12T00:00:00.000+00:00",
-};
+import { PDFDocument, PageSizes, StandardFonts } from 'pdf-lib';
 
 const fontSize = {
   heading: 20,
   text: 14,
 };
 
-const createInvoice = async invoiceData => {
+export const createInvoice = async (invoiceData) => {
   const {
     invoiceId,
     date,
@@ -65,7 +31,7 @@ const createInvoice = async invoiceData => {
     accountNumber,
     accountSortCode,
     accountAddress,
-    accountPostcode,
+    accountPostCode,
     accountCity,
     accountCountry,
     paymentReceived,
@@ -94,7 +60,7 @@ const createInvoice = async invoiceData => {
     size: fontSize.text,
   });
 
-  page.drawText("From:", {
+  page.drawText('From:', {
     x: margin,
     y: height - 100,
     size: fontSize.text,
@@ -109,7 +75,7 @@ const createInvoice = async invoiceData => {
     senderCountry,
     senderPhone,
     senderEmail,
-  ].forEach(text => {
+  ].forEach((text) => {
     if (text) {
       page.drawText(text, {
         x: margin,
@@ -120,8 +86,8 @@ const createInvoice = async invoiceData => {
     }
   });
 
-  page.drawText("To:", {
-    x: width - margin - primaryFont.widthOfTextAtSize("To:", 14),
+  page.drawText('To:', {
+    x: width - margin - primaryFont.widthOfTextAtSize('To:', 14),
     y: height - 100,
     size: fontSize.text,
   });
@@ -135,7 +101,7 @@ const createInvoice = async invoiceData => {
     clientCountry,
     clientPhone,
     clientEmail,
-  ].forEach(text => {
+  ].forEach((text) => {
     if (text) {
       const textWidth = primaryFont.widthOfTextAtSize(text, fontSize.text);
       page.drawText(text, {
@@ -147,7 +113,7 @@ const createInvoice = async invoiceData => {
     }
   });
 
-  page.drawText("Invoice Details", {
+  page.drawText('Invoice Details', {
     x: margin,
     y: height - 300,
     size: fontSize.text,
@@ -160,13 +126,13 @@ const createInvoice = async invoiceData => {
     size: fontSize.text,
   });
 
-  const amountLabelText = "Amount";
+  const amountLabelText = 'Amount';
   const amountLabelTextWidth = primaryFont.widthOfTextAtSize(
     amountLabelText,
     fontSize.text
   );
 
-  page.drawText("Amount", {
+  page.drawText('Amount', {
     x: width - margin - amountLabelTextWidth,
     y: height - 300,
     size: fontSize.text,
@@ -185,7 +151,7 @@ const createInvoice = async invoiceData => {
     size: fontSize.text,
   });
 
-  page.drawText("Method of Payment:", {
+  page.drawText('Method of Payment:', {
     x: margin,
     y: height - 380,
     size: fontSize.text,
@@ -221,7 +187,7 @@ const createInvoice = async invoiceData => {
     offset += 20;
   }
 
-  page.drawText("Address:", {
+  page.drawText('Address:', {
     x: margin,
     y: height - 470 - offset,
     size: fontSize.text,
@@ -232,7 +198,8 @@ const createInvoice = async invoiceData => {
     y: height - 490 - offset,
     size: fontSize.text,
   });
-  page.drawText(accountPostcode, {
+
+  page.drawText(accountPostCode, {
     x: margin,
     y: height - 510 - offset,
     size: fontSize.text,
@@ -256,7 +223,7 @@ const createInvoice = async invoiceData => {
       size: fontSize.text,
     }
   );
-  const thankYouText = "Thank you for your business!";
+  const thankYouText = 'Thank you for your business!';
   const thankYouTextWidth = primaryFont.widthOfTextAtSize(thankYouText, 12);
   page.drawText(thankYouText, {
     x: width / 2 - thankYouTextWidth / 2,
@@ -276,17 +243,7 @@ const createInvoice = async invoiceData => {
   }
 
   const pdfBytes = await document.save();
-
-  const filebuff = Buffer.from(pdfBytes);
-  await fs.promises.writeFile("out.pdf", pdfBytes);
-};
-
-createInvoice(data);
-
-export default async ({ res, log, error }) => {
-  try {
-  } catch (err) {
-    console.error(err);
-    error(err.message);
-  }
+  return {
+    pdfBytes,
+  };
 };

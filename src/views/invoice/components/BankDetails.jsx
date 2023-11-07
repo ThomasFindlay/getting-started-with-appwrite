@@ -15,15 +15,16 @@ const BankDetails = props => {
           onChange={onFormChange("accountName")}
         />
         <Input
-          label="Sort Code"
-          value={form.accountSortCode}
-          onChange={onFormChange("accountSortCode")}
-        />
-        <Input
           label="Account Number"
           value={form.accountNumber}
           onChange={onFormChange("accountNumber")}
         />
+        <Input
+          label="Sort Code"
+          value={form.accountSortCode}
+          onChange={onFormChange("accountSortCode")}
+        />
+
         <Input
           label="IBAN"
           value={form.accountIban}
@@ -33,6 +34,21 @@ const BankDetails = props => {
           label="Address"
           value={form.accountAddress}
           onChange={onFormChange("accountAddress")}
+        />
+        <Input
+          label="Postcode"
+          value={form.accountPostCode}
+          onChange={onFormChange("accountPostCode")}
+        />
+        <Input
+          label="City"
+          value={form.accountCity}
+          onChange={onFormChange("accountCity")}
+        />
+        <Input
+          label="Country"
+          value={form.accountCountry}
+          onChange={onFormChange("accountCountry")}
         />
       </div>
     </div>
