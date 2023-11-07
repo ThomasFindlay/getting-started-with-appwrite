@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import Input from "../../components/form/Input";
+import { useUserActionsContext } from "../../context/user.context";
 
 const config = {
   login: {
@@ -21,26 +23,29 @@ const config = {
 };
 
 const Auth = props => {
+  const { login, createAccount } = useUserActionsContext();
   const [form, setForm] = useState({
     email: "",
     password: "",
   });
+  const navigate = useNavigate();
   const [error, setError] = useState(null);
   const location = useLocation();
-  const isLoginPage = location.pathname.includes("login");
+  const isCreateAccountPage = location.pathname.includes("register");
   const { header, submitButtonText, toggleAuthModeLink } =
-    config[isLoginPage ? "login" : "register"];
+    config[isCreateAccountPage ? "register" : "login"];
 
-  const onFormChange = key => event => {
+  const onFormChange = key => value => {
     setForm(state => ({
       ...state,
-      [key]: event.target.value,
+      [key]: value,
     }));
   };
 
   const onFormSubmit = async event => {
     event.preventDefault();
     const { email, password } = form;
+    console.log(form);
     if (!email) {
       setError("Please enter your email.");
       return;
@@ -51,53 +56,53 @@ const Auth = props => {
       return;
     }
 
-    if (isLoginPage) {
-      // login
-    } else {
-      // create account
+    try {
+      if (isCreateAccountPage) {
+        await createAccount(email, password);
+      }
+
+      const loginSession = await login(email, password);
+
+      console.log("result", loginSession);
+      navigate("/");
+    } catch (error) {
+      console.error(error);
     }
   };
 
   return (
-    <div className="bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400 min-h-screen flex flex-col items-center justify-center">
-      <div className="w-3/4 md:w-1/2 md:min-h-screen md:ml-auto flex justify-center items-center bg-white mx-8 md:mx-0">
-        <form
-          className="w-full md:w-96 p-8 md:p-4 rounded-xl"
-          onSubmit={onFormSubmit}
-        >
-          <h1 className="text-2xl font-semibold mb-8">{header}</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400">
+      <div className="flex items-center justify-center w-3/4 mx-8 bg-white md:w-1/2 md:min-h-screen md:ml-auto md:mx-0 max-md:rounded-2xl">
+        <form className="w-full p-8 md:w-96 md:p-4" onSubmit={onFormSubmit}>
+          <h1 className="mb-8 text-2xl font-semibold text-center">{header}</h1>
 
-          <div className="flex flex-col gap-3 items-start">
-            <div className="flex flex-col gap-1 w-full">
-              <label htmlFor="email-field">Email</label>
-              <input
-                id="email-field"
-                className="shadow px-4 py-2 rounded-md"
-                type="email"
-                value={form.email}
-                onChange={onFormChange("email")}
-              />
-            </div>
-            <div className="flex flex-col gap-1 w-full">
-              <label htmlFor="password-field">Password</label>
-              <input
-                id="password-field"
-                className="shadow px-4 py-2 rounded-md"
-                type="password"
-                value={form.password}
-                onChange={onFormChange("password")}
-              />
-            </div>
+          <div className="flex flex-col items-start gap-3">
+            <Input
+              label="Email"
+              id="email-field"
+              className="px-4 py-2 rounded-md shadow"
+              type="email"
+              value={form.email}
+              onChange={onFormChange("email")}
+            />
+            <Input
+              label="Password"
+              id="password-field"
+              className="px-4 py-2 rounded-md shadow"
+              type="password"
+              value={form.password}
+              onChange={onFormChange("password")}
+            />
           </div>
           <button
-            className="block w-full h-12 bg-indigo-800 text-indigo-50 rounded-md mt-6"
+            className="block w-full h-12 mt-6 text-indigo-100 transition-colors duration-150 bg-indigo-600 rounded-md hover:bg-indigo-800"
             type="submit"
           >
             {submitButtonText}
           </button>
 
           <Link
-            className="text-center mt-6 block hover:text-indigo-600 transition-colors duration-150"
+            className="block mt-6 text-center text-indigo-900 transition-colors duration-150 hover:text-indigo-600"
             to={toggleAuthModeLink.to}
           >
             {toggleAuthModeLink.text}

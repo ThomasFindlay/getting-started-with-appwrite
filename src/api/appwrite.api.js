@@ -7,3 +7,4 @@ client
 
 export const account = new Account(client);
 export const databases = new Databases(client);
+export const databaseId = import.meta.env.VITE_APPWRITE_DATABASE_ID;
