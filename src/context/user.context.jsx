@@ -12,11 +12,10 @@ export const UserContextProvider = props => {
   const [user, setUser] = useState(null);
   const [isInitialised, setIsInitialised] = useState(false);
   const navigate = useNavigate();
-  console.log({ isInitialised });
+
   const initUserSession = async () => {
     try {
       const currentSession = await getCurrentAuthSession();
-      console.log("currentSession", currentSession);
       if (currentSession) {
         setUser(currentSession);
       } else {
@@ -30,7 +29,6 @@ export const UserContextProvider = props => {
   };
 
   useEffect(() => {
-    console.log("in user context useeffect");
     initUserSession();
   }, []);
 

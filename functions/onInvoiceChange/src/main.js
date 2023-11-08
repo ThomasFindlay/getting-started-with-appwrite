@@ -9,9 +9,10 @@ import {
 import { createInvoice } from './helpers/createInvoicePdf.js';
 import { Buffer } from 'node:buffer';
 
-const BUCKET_ID = '654a047fa34df2c72f66';
-const APPWRITE_SERVER_STORAGE_KEY =
-  '7fd52e25abb4cc96548c697367c54244b61b06ea741a1fc8393362606770a9de81d4aba6f110790093a565bb41c2ebe3ac4da8f4a1112c9f0fe17726138702244e41ca6c164f4b631cdba7b21cae3f49f6b3d446882a65810861bfa2413615157f0b128ecc101fa2af5932fb3843e7dc498f03064c42c4f3dccc34c6c8835126';
+const APPWRITE_BUCKET_ID = process.env.APPWRITE_BUCKET_ID
+const APPWRITE_SERVER_STORAGE_KEY = process.env.APPWRITE_SERVER_STORAGE_KEY
+const APPWRITE_PROJECT_ID = process.env.APPWRITE_PROJECT_ID
+const APPWRITE_SERVER_ENDPOINT = process.env.APPWRITE_SERVER_ENDPOINT
 
 const onCreateInvoice = async ({ req, res, log, error, storage }) => {
   const { $id } = req.body;
@@ -22,7 +23,7 @@ const onCreateInvoice = async ({ req, res, log, error, storage }) => {
   const filename = `${fileId}.pdf`;
   const ownerRole = Role.user(userId);
   await storage.createFile(
-    BUCKET_ID,
+    APPWRITE_BUCKET_ID,
     fileId,
     InputFile.fromBuffer(buffer, filename),
     [
@@ -36,6 +37,7 @@ const onCreateInvoice = async ({ req, res, log, error, storage }) => {
     message: 'Invoice created',
   });
 };
+
 const onUpdateInvoice = async ({ req, res, log, error, storage }) => {
   const { $id } = req.body;
   const { pdfBytes } = await createInvoice(req.body);
@@ -46,13 +48,13 @@ const onUpdateInvoice = async ({ req, res, log, error, storage }) => {
   const ownerRole = Role.user(userId);
 
   try {
-    await storage.deleteFile(BUCKET_ID, fileId);
+    await storage.deleteFile(APPWRITE_BUCKET_ID, fileId);
   } catch (err) {
     error(err);
     error(`Could not delete invoice file with ID ${fileId} `);
   }
   await storage.createFile(
-    BUCKET_ID,
+    APPWRITE_BUCKET_ID,
     fileId,
     InputFile.fromBuffer(buffer, filename),
     [
@@ -71,7 +73,7 @@ const onDeleteInvoice = async ({ req, res, log, error, storage }) => {
   const fileId = `INVOICE_${$id}`;
 
   try {
-    await storage.deleteFile(BUCKET_ID, fileId);
+    await storage.deleteFile(APPWRITE_BUCKET_ID, fileId);
   } catch (err) {
     error(error);
   }
@@ -86,8 +88,6 @@ const eventHandlers = {
   delete: onDeleteInvoice,
 };
 
-// This is your Appwrite function
-// It's executed each time we get a request
 export default async ({ req, res, log, error }) => {
   if (req.method !== 'POST') {
     return res.send('Method not allowed', 403);
@@ -110,14 +110,10 @@ export default async ({ req, res, log, error }) => {
   const handler = eventHandlers[eventType];
 
   const client = new Client()
-    .setEndpoint('https://cloud.appwrite.io/v1')
-    .setProject('6548caed43d0fdcae3ee')
+    .setEndpoint(APPWRITE_SERVER_ENDPOINT)
+    .setProject(APPWRITE_PROJECT_ID)
     .setKey(APPWRITE_SERVER_STORAGE_KEY);
   const storage = new Storage(client);
-
-  log(req.bodyRaw); // Raw request body, contains request data
-  log(JSON.stringify(req.body)); // Object from parsed JSON request body, otherwise string
-  log(JSON.stringify(req.headers)); // String key-value pairs of
 
   return handler({ req, res, log, error, client, storage });
 };
