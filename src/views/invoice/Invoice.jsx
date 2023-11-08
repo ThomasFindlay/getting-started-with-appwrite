@@ -1,21 +1,13 @@
-import { Link, useNavigate, useParams } from "react-router-dom";
-import Input from "../../components/form/Input";
-import { useEffect, useRef, useState } from "react";
-import {
-  createInvoice,
-  deleteInvoice,
-  getInvoice,
-  getInvoiceFileUrl,
-  listInvoices,
-  updateInvoice,
-} from "../../api/invoice.api";
-import { useUserContext } from "../../context/user.context";
+import { Link } from "react-router-dom";
 import BankDetails from "./components/BankDetails";
 import ClientDetails from "./components/ClientDetails";
-import SenderDetails from "./components/SenderDetails";
 import InvoiceDetails from "./components/InvoiceDetails";
-import toast from "react-hot-toast";
-import { formatDate } from "../../helpers/formatDate";
+import SenderDetails from "./components/SenderDetails";
+import { useDeleteInvoice } from "./hooks/useDeleteInvoice";
+import { useDownloadInvoice } from "./hooks/useDownloadInvoice";
+import { useFetchInvoice } from "./hooks/useFetchInvoice";
+import { useInvoiceForm } from "./hooks/useInvoiceForm";
+import { useSubmitInvoice } from "./hooks/useSubmitInvoice";
 
 const config = {
   create: {
@@ -27,193 +19,23 @@ const config = {
 };
 
 const Invoice = props => {
-  const { user } = useUserContext();
-  const [form, setForm] = useState({
-    // invoiceId: "0001",
-    // date: "2023-11-12",
-    // dueDate: "2023-12-10",
-    // amount: "£2400",
-    // description: "Web Development Services",
-    // senderName: "Thomas",
-    // senderAddress: "",
-    // senderPostcode: "",
-    // senderCity: "",
-    // senderCountry: "",
-    // senderEmail: "",
-    // senderPhone: "",
-    // clientName: "Client Company",
-    // clientAddress: "",
-    // clientPostcode: "",
-    // clientCity: "",
-    // clientCountry: "",
-    // clientEmail: "",
-    // clientPhone: "",
-    // accountName: "My Account Name",
-    // accountSortCode: "44-44-44",
-    // accountNumber: "321312321",
-    // accountAddress: "23 My Address",
-    // accountIban: "",
-    // paymentReceived: false,
-    // paymentDate: "",
-    invoiceId: "0001",
-    date: "2023-11-12",
-    dueDate: "2023-12-10",
-    amount: "£2400",
-    description: "Web Development Services",
-    senderName: "Thomas Findlay",
-    senderAddress: "18 Shirley Street",
-    senderPostcode: "LE1 6JD",
-    senderCity: "Leicester",
-    senderCountry: "United Kingdom",
-    senderEmail: "thomasfindlay94@gmail.com",
-    senderPhone: "07685768565",
-    clientName: "Client Company",
-    clientAddress: "3 Broadclyst Street",
-    clientPostcode: "BE5 D95",
-    clientCity: "Bristol",
-    clientCountry: "United Kingdom",
-    clientEmail: "company@gmail.com",
-    clientPhone: "5435435435",
-    accountName: "My Account Name",
-    accountNumber: "321312321",
-    accountSortCode: "44-44-44",
-    accountAddress: "23 My Address",
-    accountPostCode: "LE3 0BD",
-    accountCity: "Norwich",
-    accountCountry: "United Kingdom",
-    accountIban: "42342342343243",
-    paymentReceived: false,
-    paymentDate: "",
+  const { isEditMode, form, setForm, onFormChange } = useInvoiceForm();
+  const { fetchInvoiceStatus, initFetchInvoice } = useFetchInvoice({
+    onSetInvoice: setForm,
   });
-  const [fetchInvoiceStatus, setFetchInvoiceStatus] = useState("IDLE");
-  const [submitInvoiceStatus, setSubmitInvoiceStatus] = useState("IDLE");
-  const [deleteInvoiceStatus, setDeleteInvoiceStatus] = useState("IDLE");
+  const { submitInvoiceStatus, onSubmitInvoice } = useSubmitInvoice({
+    form,
+    isEditMode,
+  });
+  const { deleteInvoiceStatus, initDeletePrompt } = useDeleteInvoice({
+    invoiceId: form.$id,
+  });
 
-  const params = useParams();
-  const navigate = useNavigate();
-  const isEditMode = Boolean(params.id);
+  const { downloadInvoiceStatus, onDownloadInvoice } = useDownloadInvoice({
+    invoiceId: form.$id,
+  });
 
   const { submitButtonText } = isEditMode ? config.update : config.create;
-
-  const onFormChange = key => value => {
-    setForm(state => ({
-      ...state,
-      [key]: value,
-    }));
-  };
-
-  const onSubmitInvoice = async event => {
-    event.preventDefault();
-    try {
-      if (submitInvoiceStatus === "PENDING") {
-        return;
-      }
-      setSubmitInvoiceStatus("PENDING");
-      const payload = {};
-
-      for (const [key, value] of Object.entries(form)) {
-        if (value !== "") {
-          payload[key] = value;
-        }
-      }
-
-      if (isEditMode) {
-        await updateInvoice(form.$id, payload);
-        toast.success("Invoice updated");
-      } else {
-        await createInvoice(user.$id, payload);
-        toast.success("Invoice created");
-      }
-      setSubmitInvoiceStatus("SUCCESS");
-      navigate("/");
-    } catch (error) {
-      console.error(error);
-      setSubmitInvoiceStatus("ERROR");
-    }
-  };
-
-  const initFetchInvoice = async invoiceUid => {
-    try {
-      if (fetchInvoiceStatus === "PENDING") {
-        return;
-      }
-
-      setFetchInvoiceStatus("PENDING");
-
-      const invoice = await getInvoice(invoiceUid);
-
-      setForm(currentForm => {
-        const newForm = {
-          $id: invoice.$id,
-        };
-        for (const key of Object.keys(currentForm)) {
-          const value = invoice[key];
-
-          /**
-           * Format the dates
-           */
-          if (["date", "dueDate", "paymentReceived"].includes(key) && value) {
-            newForm[key] = value
-              ? formatDate(new Date(value)).split("/").toReversed().join("-")
-              : "";
-          } else {
-            newForm[key] = value === null ? "" : value;
-          }
-        }
-
-        return newForm;
-      });
-      setFetchInvoiceStatus("SUCCESS");
-    } catch (error) {
-      console.error(error);
-      toast.error("There was a problem while fetching the invoice.");
-      setFetchInvoiceStatus("ERROR");
-    }
-  };
-
-  const initDeletePrompt = async () => {
-    if (deleteInvoiceStatus === "PENDING") {
-      return;
-    }
-    const result = window.confirm(
-      "Are you sure you want to delete this invoice?"
-    );
-
-    if (!result) {
-      return;
-    }
-
-    try {
-      setDeleteInvoiceStatus("PENDING");
-      await deleteInvoice(form.$id);
-      setDeleteInvoiceStatus("SUCCESS");
-      toast.success("Invoice deleted");
-      navigate("/");
-    } catch (error) {
-      console.error(error);
-      toast.error("Could not delete the invoice");
-      setDeleteInvoiceStatus("ERROR");
-    }
-  };
-
-  const onDownloadInvoice = async () => {
-    const result = await getInvoiceFileUrl(`INVOICE_${form.$id}`);
-    console.log("result", result);
-    window.open(result.href);
-  };
-
-  console.log("form", form);
-  useEffect(() => {
-    if (!params.id) {
-      setFetchInvoiceStatus("SUCCESS");
-      return;
-    }
-    /**
-     * We are on the edit invoice page.
-     * Therefore, we need to fetch invoide details
-     */
-    initFetchInvoice(params.id);
-  }, [params.id]);
 
   return (
     <div className="flex items-center justify-center w-full min-h-screen bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400">
@@ -268,7 +90,9 @@ const Invoice = props => {
                     className="min-w-[6rem] px-4 py-3 mr-4 font-semibold text-indigo-900 transition-colors duration-150 bg-indigo-200/50 rounded-md hover:bg-indigo-800 hover:text-indigo-100"
                     onClick={onDownloadInvoice}
                   >
-                    Download Invoice
+                    {downloadInvoiceStatus === "PENDING"
+                      ? "Downloading..."
+                      : "Download Invoice"}
                   </button>
                 ) : null}
                 <button

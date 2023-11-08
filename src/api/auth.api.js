@@ -12,3 +12,7 @@ export const login = (email, password) => {
 export const getCurrentAuthSession = () => {
   return account.get();
 };
+
+export const logout = () => {
+  return account.logout("current");
+};

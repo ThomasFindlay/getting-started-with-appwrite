@@ -1,37 +1,8 @@
-import { useEffect, useRef, useState } from "react";
-import { listInvoices } from "../../api/invoice.api";
 import { Link } from "react-router-dom";
-import { formatDate } from "../../helpers/formatDate";
+import { useFetchInvoicesList } from "./hooks/useFetchInvoicesList";
 
 const ViewInvoices = props => {
-  const [invoices, setInvoices] = useState([]);
-  const [fetchInvoicesStatus, setFetchInvoiceStatus] = useState("IDLE");
-
-  const initFetchInvoices = async () => {
-    try {
-      setFetchInvoiceStatus("PENDING");
-
-      const result = await listInvoices();
-      const formattedInvoices = result.documents.map(invoice => {
-        const { date, dueDate, ...invoiceData } = invoice;
-        return {
-          ...invoiceData,
-          date: formatDate(new Date(date)),
-          dueDate: formatDate(new Date(dueDate)),
-        };
-      });
-
-      setInvoices(formattedInvoices);
-      setFetchInvoiceStatus("SUCCESS");
-    } catch (error) {
-      console.error(error);
-      setFetchInvoiceStatus("ERROR");
-    }
-  };
-
-  useEffect(() => {
-    initFetchInvoices();
-  }, []);
+  const { invoices, fetchInvoicesStatus } = useFetchInvoicesList();
 
   return (
     <div className="flex items-center justify-center w-full min-h-screen text-indigo-900 bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-400">
