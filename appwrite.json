@@ -8,7 +8,9 @@
       "runtime": "node-18.0",
       "execute": [],
       "events": [
-        "databases.*.collections.654a1bfc04ac58cfb58f.documents.*.create"
+        "databases.*.collections.654a1bfc04ac58cfb58f.documents.*.create",
+        "databases.*.collections.654a1bfc04ac58cfb58f.documents.*.update",
+        "databases.*.collections.654a1bfc04ac58cfb58f.documents.*.delete"
       ],
       "schedule": "",
       "timeout": 15,
@@ -18,6 +20,25 @@
       "commands": "npm install",
       "ignore": ["node_modules", ".npm"],
       "path": "functions/onCreateInvoice"
+    },
+    {
+      "$id": "654b799ad4416255502f",
+      "name": "on-invoice-event",
+      "runtime": "node-18.0",
+      "execute": [],
+      "events": [
+        "databases.*.collections.654a1bfc04ac58cfb58f.documents.*.create",
+        "databases.*.collections.654a1bfc04ac58cfb58f.documents.*.update",
+        "databases.*.collections.654a1bfc04ac58cfb58f.documents.*.delete"
+      ],
+      "schedule": "",
+      "timeout": 15,
+      "enabled": true,
+      "logging": true,
+      "entrypoint": "src/main.js",
+      "commands": "npm install",
+      "ignore": ["node_modules", ".npm"],
+      "path": "functions/on-invoice-event"
     }
   ]
 }

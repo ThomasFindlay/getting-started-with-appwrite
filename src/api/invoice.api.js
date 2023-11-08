@@ -1,7 +1,9 @@
 import { ID, Permission, Role } from "appwrite";
-import { databases, databaseId } from "./appwrite.api";
+import { databases, databaseId, storage } from "./appwrite.api";
 const invoiceCollectionId = import.meta.env
   .VITE_APPWRITE_COLLECTION_ID_INVOICES;
+
+const bucketId = import.meta.env.VITE_APPWRITE_BUCKET_ID;
 
 export const listInvoices = () => {
   return databases.listDocuments(databaseId, invoiceCollectionId);
@@ -37,4 +39,8 @@ export const updateInvoice = (documentId, payload) => {
 
 export const deleteInvoice = documentId => {
   return databases.deleteDocument(databaseId, invoiceCollectionId, documentId);
+};
+
+export const getInvoiceFileUrl = fileId => {
+  return storage.getFileDownload(bucketId, fileId);
 };

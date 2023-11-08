@@ -5,6 +5,7 @@ import {
   createInvoice,
   deleteInvoice,
   getInvoice,
+  getInvoiceFileUrl,
   listInvoices,
   updateInvoice,
 } from "../../api/invoice.api";
@@ -100,7 +101,6 @@ const Invoice = props => {
       [key]: value,
     }));
   };
-  console.log("user", user);
 
   const onSubmitInvoice = async event => {
     event.preventDefault();
@@ -132,29 +132,16 @@ const Invoice = props => {
     }
   };
 
-  const abortRequestRef = useRef(null);
-
   const initFetchInvoice = async invoiceUid => {
     try {
-      /**
-       * Appwrite doesn't support cancelling requests.
-       * However, we can use the AbortController to bail out
-       * after receiving a response.
-       */
-      const controller = new AbortController();
-      if (abortRequestRef.current) {
-        abortRequestRef.current();
+      if (fetchInvoiceStatus === "PENDING") {
+        return;
       }
-      abortRequestRef.current = controller.abort.bind(controller);
 
       setFetchInvoiceStatus("PENDING");
 
       const invoice = await getInvoice(invoiceUid);
-      if (controller.signal.aborted) {
-        console.warn("Request aborted");
-        return;
-      }
-      console.log("invoice", invoice);
+
       setForm(currentForm => {
         const newForm = {
           $id: invoice.$id,
@@ -162,8 +149,10 @@ const Invoice = props => {
         for (const key of Object.keys(currentForm)) {
           const value = invoice[key];
 
+          /**
+           * Format the dates
+           */
           if (["date", "dueDate", "paymentReceived"].includes(key) && value) {
-            console.log("value", value);
             newForm[key] = value
               ? formatDate(new Date(value)).split("/").toReversed().join("-")
               : "";
@@ -189,7 +178,6 @@ const Invoice = props => {
     const result = window.confirm(
       "Are you sure you want to delete this invoice?"
     );
-    console.log("result", result);
 
     if (!result) {
       return;
@@ -208,7 +196,11 @@ const Invoice = props => {
     }
   };
 
-  const onDownloadInvoice = () => {};
+  const onDownloadInvoice = async () => {
+    const result = await getInvoiceFileUrl(`INVOICE_${form.$id}`);
+    console.log("result", result);
+    window.open(result.href);
+  };
 
   console.log("form", form);
   useEffect(() => {
@@ -270,13 +262,15 @@ const Invoice = props => {
                 {deleteInvoiceStatus === "PENDING" ? "Deleting..." : "Delete"}
               </button>
               <div>
-                <button
-                  type="button"
-                  className="min-w-[6rem] px-4 py-3 mr-4 font-semibold text-indigo-900 transition-colors duration-150 bg-indigo-200/50 rounded-md hover:bg-indigo-800 hover:text-indigo-100"
-                  onClick={onDownloadInvoice}
-                >
-                  Download Invoice
-                </button>
+                {form.$id ? (
+                  <button
+                    type="button"
+                    className="min-w-[6rem] px-4 py-3 mr-4 font-semibold text-indigo-900 transition-colors duration-150 bg-indigo-200/50 rounded-md hover:bg-indigo-800 hover:text-indigo-100"
+                    onClick={onDownloadInvoice}
+                  >
+                    Download Invoice
+                  </button>
+                ) : null}
                 <button
                   type="submit"
                   className="min-w-[6rem] px-4 py-3 mr-8 font-semibold text-indigo-100 transition-colors duration-150 bg-indigo-600 rounded-md hover:bg-indigo-800"
