@@ -1,23 +1,21 @@
-import { createContext, useContext, useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { createAccount, getCurrentAuthSession, login } from "../api/auth.api";
-import { useNavigate } from "react-router-dom";
+import { UserActionsContext, UserContext } from "./user.context";
 
-const userContext = createContext({});
-const userActionsContext = createContext({});
-
-export const useUserContext = () => useContext(userContext);
-export const useUserActionsContext = () => useContext(userActionsContext);
-
-export const UserContextProvider = props => {
+const UserContextProvider = props => {
   const [user, setUser] = useState(null);
   const [isInitialised, setIsInitialised] = useState(false);
   const navigate = useNavigate();
-
+  const location = useLocation();
   const initUserSession = async () => {
     try {
       const currentSession = await getCurrentAuthSession();
       if (currentSession) {
         setUser(currentSession);
+        if (location.pathname.includes("auth")) {
+          navigate("/");
+        }
       } else {
         navigate("/auth/login");
       }
@@ -29,8 +27,14 @@ export const UserContextProvider = props => {
   };
 
   useEffect(() => {
-    initUserSession();
-  }, []);
+    if (isInitialised) {
+      if (!user && !location.pathname.includes("auth")) {
+        navigate("/auth/login");
+      }
+    } else {
+      initUserSession();
+    }
+  }, [location.pathname]);
 
   const value = useMemo(() => {
     return {
@@ -42,12 +46,13 @@ export const UserContextProvider = props => {
     return {
       login,
       createAccount,
+      setUser,
     };
   }, []);
 
   return (
-    <userContext.Provider value={value}>
-      <userActionsContext.Provider value={actions}>
+    <UserContext.Provider value={value}>
+      <UserActionsContext.Provider value={actions}>
         {isInitialised ? (
           props.children
         ) : (
@@ -55,7 +60,9 @@ export const UserContextProvider = props => {
             Loading...
           </div>
         )}
-      </userActionsContext.Provider>
-    </userContext.Provider>
+      </UserActionsContext.Provider>
+    </UserContext.Provider>
   );
 };
+
+export default UserContextProvider;

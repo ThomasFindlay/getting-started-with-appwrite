@@ -22,8 +22,8 @@ const config = {
   },
 };
 
-const Auth = props => {
-  const { login, createAccount } = useUserActionsContext();
+const Auth = () => {
+  const { login, createAccount, setUser } = useUserActionsContext();
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -62,8 +62,8 @@ const Auth = props => {
       }
 
       const loginSession = await login(email, password);
+      setUser(loginSession);
 
-      console.log("result", loginSession);
       navigate("/");
     } catch (error) {
       console.error(error);
@@ -94,6 +94,12 @@ const Auth = props => {
               onChange={onFormChange("password")}
             />
           </div>
+
+          {error ? (
+            <p className="block mt-2 text-red-600">
+              There was an authentication problem. Please try again.
+            </p>
+          ) : null}
           <button
             className="block w-full h-12 mt-6 text-indigo-100 transition-colors duration-150 bg-indigo-600 rounded-md hover:bg-indigo-800"
             type="submit"
