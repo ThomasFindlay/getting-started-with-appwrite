@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import BankDetails from "./components/BankDetails";
 import ClientDetails from "./components/ClientDetails";
 import InvoiceDetails from "./components/InvoiceDetails";
@@ -18,7 +18,8 @@ const config = {
   },
 };
 
-const Invoice = props => {
+const Invoice = () => {
+  const params = useParams();
   const { isEditMode, form, setForm, onFormChange } = useInvoiceForm();
   const { fetchInvoiceStatus, initFetchInvoice } = useFetchInvoice({
     onSetInvoice: setForm,
