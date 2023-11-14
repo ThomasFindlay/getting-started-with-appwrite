@@ -29,9 +29,11 @@ export const useInvoiceForm = () => {
     accountNumber: "",
     accountAddress: "",
     accountIban: "",
+    accountPostCode: "",
+    accountCity: "",
+    accountCountry: "",
     paymentReceived: false,
     paymentDate: "",
-  
   });
 
   const onFormChange = key => value => {

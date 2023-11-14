@@ -5,7 +5,7 @@ const fontSize = {
   text: 14,
 };
 
-export const createInvoice = async (invoiceData) => {
+export const createInvoicePdf = async (invoiceData) => {
   const {
     invoiceId,
     date,

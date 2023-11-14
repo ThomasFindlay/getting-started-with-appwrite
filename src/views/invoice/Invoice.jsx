@@ -21,13 +21,17 @@ const config = {
 const Invoice = () => {
   const params = useParams();
   const { isEditMode, form, setForm, onFormChange } = useInvoiceForm();
+
   const { fetchInvoiceStatus, initFetchInvoice } = useFetchInvoice({
+    id: params.id,
     onSetInvoice: setForm,
   });
+
   const { submitInvoiceStatus, onSubmitInvoice } = useSubmitInvoice({
     form,
     isEditMode,
   });
+
   const { deleteInvoiceStatus, initDeletePrompt } = useDeleteInvoice({
     invoiceId: form.$id,
   });
