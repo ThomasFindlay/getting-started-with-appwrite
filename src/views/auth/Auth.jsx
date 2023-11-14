@@ -23,7 +23,8 @@ const config = {
 };
 
 const Auth = () => {
-  const { login, createAccount, setUser } = useUserActionsContext();
+  const { login, createAccount, setUser, setIsInitialized } =
+    useUserActionsContext();
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -63,6 +64,7 @@ const Auth = () => {
 
       const loginSession = await login(email, password);
       setUser(loginSession);
+      setIsInitialized(true);
 
       navigate("/");
     } catch (error) {

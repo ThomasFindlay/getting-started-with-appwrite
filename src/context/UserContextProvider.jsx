@@ -5,10 +5,14 @@ import { UserActionsContext, UserContext } from "./user.context";
 
 const UserContextProvider = props => {
   const [user, setUser] = useState(null);
-  const [isInitialised, setIsInitialised] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const initUserSession = async () => {
+    /**
+     * Initialize user's auth session.
+     * If there is no session, redirect to the login page.
+     */
     try {
       const currentSession = await getCurrentAuthSession();
       if (currentSession) {
@@ -23,11 +27,15 @@ const UserContextProvider = props => {
       console.error(error);
       navigate("/auth/login");
     }
-    setIsInitialised(true);
+    setIsInitialized(true);
   };
 
   useEffect(() => {
-    if (isInitialised) {
+    /**
+     * Initialize user's session if the app was just loaded
+     * or if a user was already initialised, determine if a user should be redirected to the login page.
+     */
+    if (isInitialized) {
       if (!user && !location.pathname.includes("auth")) {
         navigate("/auth/login");
       }
@@ -47,13 +55,14 @@ const UserContextProvider = props => {
       login,
       createAccount,
       setUser,
+      setIsInitialized,
     };
   }, []);
 
   return (
     <UserContext.Provider value={value}>
       <UserActionsContext.Provider value={actions}>
-        {isInitialised ? (
+        {isInitialized ? (
           props.children
         ) : (
           <div className="flex items-center justify-center min-h-screen font-semibold text-indigo-600">
