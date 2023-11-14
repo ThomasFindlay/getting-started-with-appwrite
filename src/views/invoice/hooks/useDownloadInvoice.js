@@ -10,8 +10,13 @@ export const useDownloadInvoice = ({ invoiceId }) => {
         return;
       }
       setDownloadInvoiceStatus("PENDING");
-      const result = await getInvoiceFileUrl(`INVOICE_${invoiceId}`);
-      window.open(result.href);
+      const fileId = `INVOICE_${invoiceId}`;
+      const result = await getInvoiceFileUrl(fileId);
+      const anchor = document.createElement("a");
+      anchor.href = result.href;
+      anchor.download = `${fileId}.pdf`;
+      anchor.click();
+      anchor.remove();
       setDownloadInvoiceStatus("SUCCESS");
     } catch (error) {
       console.error(error);

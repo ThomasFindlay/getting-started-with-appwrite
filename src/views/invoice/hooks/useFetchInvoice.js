@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import toast from "react-hot-toast";
 import { getInvoice } from "../../../api/invoice.api";
 import { formatDate } from "../../../helpers/formatDate";
-import toast from 'react-hot-toast'
 
-export const useFetchInvoice = ({ onSetInvoice }) => {
-  const [fetchInvoiceStatus, setFetchInvoiceStatus] = useState("IDLE");
-  const params = useParams();
+export const useFetchInvoice = ({ id, onSetInvoice }) => {
+  /**
+   * If there is no ID we just set the status to success, as there is no ID,
+   * so the fetch request won't be executed.
+   */
+  const [fetchInvoiceStatus, setFetchInvoiceStatus] = useState(
+    id ? "IDLE" : "SUCCESS"
+  );
 
   const initFetchInvoice = async invoiceUid => {
     try {
@@ -28,15 +32,17 @@ export const useFetchInvoice = ({ onSetInvoice }) => {
           /**
            * Format the dates
            */
-          if (["date", "dueDate", "paymentReceived"].includes(key) && value) {
-            newForm[key] = value
-              ? formatDate(new Date(value)).split("/").toReversed().join("-")
-              : "";
+          if (["date", "dueDate", "paymentDate"].includes(key) && value) {
+            if (!value) {
+              newForm[key] = "";
+            } else {
+              const [month, day, year] = formatDate(new Date(value)).split("/");
+              newForm[key] = `${year}-${month}-${day}`;
+            }
           } else {
             newForm[key] = value === null ? "" : value;
           }
         }
-
         return newForm;
       });
       setFetchInvoiceStatus("SUCCESS");
@@ -48,16 +54,18 @@ export const useFetchInvoice = ({ onSetInvoice }) => {
   };
 
   useEffect(() => {
-    if (!params.id) {
-      setFetchInvoiceStatus("SUCCESS");
+    /**
+     * Bail out if there is no invoice ID
+     */
+    if (!id) {
       return;
     }
     /**
      * We are on the edit invoice page.
      * Therefore, we need to fetch invoide details
      */
-    initFetchInvoice(params.id);
-  }, [params.id]);
+    initFetchInvoice(id);
+  }, [id]);
 
   return {
     fetchInvoiceStatus,

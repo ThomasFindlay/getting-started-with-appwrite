@@ -45,7 +45,7 @@ const Auth = () => {
   const onFormSubmit = async event => {
     event.preventDefault();
     const { email, password } = form;
-    console.log(form);
+
     if (!email) {
       setError("Please enter your email.");
       return;
@@ -67,6 +67,7 @@ const Auth = () => {
       navigate("/");
     } catch (error) {
       console.error(error);
+      setError(error.messsage);
     }
   };
 
@@ -95,11 +96,7 @@ const Auth = () => {
             />
           </div>
 
-          {error ? (
-            <p className="block mt-2 text-red-600">
-              There was an authentication problem. Please try again.
-            </p>
-          ) : null}
+          {error ? <p className="block mt-2 text-red-600">{error}</p> : null}
           <button
             className="block w-full h-12 mt-6 text-indigo-100 transition-colors duration-150 bg-indigo-600 rounded-md hover:bg-indigo-800"
             type="submit"

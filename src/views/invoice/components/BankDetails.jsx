@@ -2,6 +2,7 @@ import Input from "../../../components/form/Input";
 
 const BankDetails = props => {
   const { form, onFormChange } = props;
+
   return (
     <div>
       <h2 className="mb-4 text-sm font-semibold text-indigo-600/75">

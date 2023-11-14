@@ -1,22 +1,16 @@
-import {
-  Client,
-  Storage,
-  InputFile,
-  ID,
-  Permission,
-  Role,
-} from 'node-appwrite';
-import { createInvoice } from './helpers/createInvoicePdf.js';
+/* global process */
+import { Client, Storage, InputFile, Permission, Role } from 'node-appwrite';
+import { createInvoicePdf } from './helpers/createInvoicePdf.js';
 import { Buffer } from 'node:buffer';
 
-const APPWRITE_BUCKET_ID = process.env.APPWRITE_BUCKET_ID
-const APPWRITE_SERVER_STORAGE_KEY = process.env.APPWRITE_SERVER_STORAGE_KEY
-const APPWRITE_PROJECT_ID = process.env.APPWRITE_PROJECT_ID
-const APPWRITE_SERVER_ENDPOINT = process.env.APPWRITE_SERVER_ENDPOINT
+const APPWRITE_BUCKET_ID = process.env.APPWRITE_BUCKET_ID;
+const APPWRITE_SERVER_API_KEY = process.env.APPWRITE_SERVER_API_KEY;
+const APPWRITE_PROJECT_ID = process.env.APPWRITE_PROJECT_ID;
+const APPWRITE_SERVER_ENDPOINT = process.env.APPWRITE_SERVER_ENDPOINT;
 
-const onCreateInvoice = async ({ req, res, log, error, storage }) => {
+const onCreateInvoice = async ({ req, res, storage }) => {
   const { $id } = req.body;
-  const { pdfBytes } = await createInvoice(req.body);
+  const { pdfBytes } = await createInvoicePdf(req.body);
   const buffer = Buffer.from(pdfBytes);
   const userId = req.headers['x-appwrite-user-id'];
   const fileId = `INVOICE_${$id}`;
@@ -38,9 +32,9 @@ const onCreateInvoice = async ({ req, res, log, error, storage }) => {
   });
 };
 
-const onUpdateInvoice = async ({ req, res, log, error, storage }) => {
+const onUpdateInvoice = async ({ log, req, res, storage }) => {
   const { $id } = req.body;
-  const { pdfBytes } = await createInvoice(req.body);
+  const { pdfBytes } = await createInvoicePdf(req.body);
   const buffer = Buffer.from(pdfBytes);
   const fileId = `INVOICE_${$id}`;
   const filename = `${fileId}.pdf`;
@@ -50,9 +44,10 @@ const onUpdateInvoice = async ({ req, res, log, error, storage }) => {
   try {
     await storage.deleteFile(APPWRITE_BUCKET_ID, fileId);
   } catch (err) {
-    error(err);
-    error(`Could not delete invoice file with ID ${fileId} `);
+    log(err);
+    log(`Could not delete invoice file with ID ${fileId} `);
   }
+
   await storage.createFile(
     APPWRITE_BUCKET_ID,
     fileId,
@@ -68,7 +63,7 @@ const onUpdateInvoice = async ({ req, res, log, error, storage }) => {
   });
 };
 
-const onDeleteInvoice = async ({ req, res, log, error, storage }) => {
+const onDeleteInvoice = async ({ req, res, error, storage }) => {
   const { $id } = req.body;
   const fileId = `INVOICE_${$id}`;
 
@@ -112,7 +107,7 @@ export default async ({ req, res, log, error }) => {
   const client = new Client()
     .setEndpoint(APPWRITE_SERVER_ENDPOINT)
     .setProject(APPWRITE_PROJECT_ID)
-    .setKey(APPWRITE_SERVER_STORAGE_KEY);
+    .setKey(APPWRITE_SERVER_API_KEY);
   const storage = new Storage(client);
 
   return handler({ req, res, log, error, client, storage });

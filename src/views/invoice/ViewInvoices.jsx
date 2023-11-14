@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { useFetchInvoicesList } from "./hooks/useFetchInvoicesList";
 
-const ViewInvoices = props => {
+const ViewInvoices = () => {
   const { invoices, fetchInvoicesStatus } = useFetchInvoicesList();
 
   return (
@@ -104,7 +104,7 @@ const ViewInvoices = props => {
               to="/invoice/create"
               className="font-semibold text-indigo-600"
             >
-              You have no invoices. Let's create one!
+              You have no invoices. Let&apos;s create one!
             </Link>
           )
         ) : (
